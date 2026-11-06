@@ -1,0 +1,114 @@
+\documentclass[12pt,a4paper,fleqn]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{titlesec}
+
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection}{0.7em}{}
+\titlespacing*{\section}{0pt}{12pt}{0pt}
+\numberwithin{equation}{section}
+\setlength{\parindent}{0pt}
+\setlength{\jot}{7pt}
+\setlength{\mathindent}{1.5em}
+\pagestyle{empty}
+
+\newcommand{\I}{I}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Bias}{\operatorname{Bias}}
+\newcommand{\bx}{\mathbf{x}}
+\newcommand{\bX}{\mathbf{X}}
+\newcommand{\SE}{\mathrm{SE}}
+\newcommand{\indep}{\mathrel{\perp\!\!\!\perp}}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries Formula sheet --- Assignment 1}\\[4pt]
+\end{center}
+
+%====================================================================
+\section{Geometry and bounding box}
+\begin{align}
+&\text{Sphere } \mathcal S:\quad x^2+y^2+z^2\le k^2\\
+&\text{Torus } \mathcal T:\quad \Big(\sqrt{(x-x_c)^2+(y-y_c)^2}-R\Big)^2+(z-z_c)^2\le r^2\\
+&A=\mathcal S\cap\mathcal T,\qquad
+\I(\bx)=\begin{cases}1, & \bx\in A\\ 0, & \bx\notin A\end{cases},\qquad \bx=(x,y,z)\\
+&\bx\in A\ \Rightarrow\ |x|\le k,\quad |y|\le k,\quad z_c-r\le z\le z_c+r\\
+&\text{Bounding box: }\ A\subset B=[x_{\min},x_{\max}]\times[y_{\min},y_{\max}]\times[z_{\min},z_{\max}]\\
+&\text{Volume of } B\text{: }\ V_B=(x_{\max}-x_{\min})(y_{\max}-y_{\min})(z_{\max}-z_{\min})
+\end{align}
+
+%====================================================================
+\section{From integral to expectation}
+\begin{align}
+&\E\big[g(\bX)\big]=\int g(\bx)\,f_{\bX}(\bx)\,d\bx\\
+&\bX\sim U(B):\qquad f_{\bX}(\bx)=\begin{cases}\dfrac{1}{V_B}, & \bx\in B\\[6pt] 0, & \text{otherwise}\end{cases}\\
+&V=\iiint_B\I(x,y,z)\,dx\,dy\,dz=V_B\,\E\big[\I(\bX)\big]
+\end{align}
+
+%====================================================================
+\section{Monte Carlo estimator}
+\begin{align}
+&x=x_{\min}+(x_{\max}-x_{\min})\,U,\qquad U\sim U(0,1)\quad(\text{same for } y,z)\\
+&\hat V_n=V_B\,\frac{H}{n},\qquad H=\sum_{i=1}^n\I(\bX_i)\\
+&\Bias(\hat V_n)=\E\big[\hat V_n\big]-V=0
+\end{align}
+
+%====================================================================
+\section{Law of large numbers}
+\begin{align}
+&\text{WLLN:}\quad \Prob\big(|\bar X_n-\mu|>\varepsilon\big)\xrightarrow{\ n\to\infty\ }0\quad\forall\,\varepsilon>0\\
+&\text{SLLN:}\quad \Prob\Big(\lim_{n\to\infty}\bar X_n=\mu\Big)=1\\
+&\hat V_n=V_B\,\frac Hn\ \xrightarrow{\ n\to\infty\ }\ V_B\,\E\big[\I(\bX)\big]=V
+\end{align}
+
+%====================================================================
+\section{Assumptions}
+\begin{gather}
+\bX_i\sim U(B)\tag{A1}\\
+\bX_i\indep\bX_j,\quad i\neq j\tag{A2}
+\end{gather}
+
+%====================================================================
+\section{Central limit theorem and error}
+\begin{align}
+&\Var(X_1+\dots+X_n)=\Var(X_1)+\dots+\Var(X_n)=n\sigma^2,\qquad \sqrt{n\sigma^2}=\sigma\sqrt n\\
+&\lim_{n\to\infty}\Prob\bigg(\frac{(X_1+\dots+X_n)-n\mu}{\sigma\sqrt n}<z\bigg)=\Phi(z),\qquad
+z=\frac{\bar X_n-\mu}{\sigma/\sqrt n}\\
+&f=\frac{V}{V_B},\qquad \sigma^2=V_B^2\,f(1-f),\qquad \SE=V_B\sqrt{\frac{\hat f(1-\hat f)}{n}}\ \propto\ \frac{1}{\sqrt n}\\
+&\text{CI:}\quad \hat V_n\pm z\,\SE
+\end{align}
+
+%====================================================================
+\section{Reference volume}
+\begin{align}
+&V=\int A_{\mathrm{ring}}(z)\,dz,\qquad A_{\mathrm{ring}}(z)=\pi\big(\rho_{\mathrm{out}}(z)^2-\rho_{\mathrm{in}}(z)^2\big)\\
+&\text{Trapezoid: error } O\big(n^{-2}\big),\ \ O\big(n^d\big)\text{ evaluations}
+\qquad\text{MC: error } O\big(n^{-1/2}\big)\ \ \forall\,d\\
+&R+r\le k\ \Rightarrow\ \mathcal T\subset\mathcal S\ \Rightarrow\ V=(2\pi R)(\pi r^2)=2\pi^2Rr^2
+\end{align}
+
+%====================================================================
+\section{Logistic map}
+\begin{align}
+&X_{k+1}=m\,X_k(1-X_k)\\
+&X_k\in\Big[\frac{m^2(4-m)}{16},\ \frac m4\Big]\\
+&X_k\nsim U(0,1)\ \ (\text{A1 fails}),\qquad X_{k+1}\text{ fixed by }X_k\ \ (\text{A2 fails})
+\quad\Rightarrow\quad\Bias(\hat V_n)\neq0
+\end{align}
+
+%====================================================================
+\section{Mixture proposal}
+\begin{align}
+&q(\bx)=\begin{cases}\dfrac{p}{V_B}+\dfrac{1-p}{V_S}, & \bx\in S\\[8pt] \dfrac{p}{V_B}, & \bx\in B,\ \bx\notin S\end{cases}
+\qquad A\subset S\subset B\\
+&\E\big[\hat V_{\mathrm{naive}}\big]=\E\Big[V_B\,\frac Hn\Big]=V\Big(p+(1-p)\,\frac{V_B}{V_S}\Big)\neq V\\
+&\hat V_w=\frac1n\sum_{i=1}^n\frac{\I(\bX_i)}{q(\bX_i)},\qquad
+\E\big[\hat V_w\big]=V\\
+&\Var\big(\hat V_w\big)=\frac1n\Big(\frac{V}{q_S}-V^2\Big),\qquad q_S=\frac{p}{V_B}+\frac{1-p}{V_S}
+\end{align}
+
+\end{document}
