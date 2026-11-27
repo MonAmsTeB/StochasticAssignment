@@ -318,6 +318,54 @@ save(fig, "figure3_queue_length")
 
 
 # ---------------------------------------------------------------------------
+# Figure 6: with rho > 1 the mean wait depends on how long you simulate
+# ---------------------------------------------------------------------------
+n_day = round(lane_rate * 16 * 60)   # passengers arriving at one lane in a 16-hour day
+n_axis = np.arange(1, n_day + 1)
+end_offset = {"Baseline": -9, "Option A": 0, "Option B": 9, "5 servers": 9}   # points, avoids overlap
+
+fig, ax = plt.subplots(figsize=(9, 5))
+run_length = {}
+for i, (name, par) in enumerate(all_scen.items()):
+    # same seeds as Part 2B and Figure 3, so the first 3000 passengers are the same passengers
+    cum_means = np.array([np.cumsum(discrete_event_simulator(lane_rate, par["mean_B"], par["sigma"],
+                                                             par["servers"], n_day,
+                                                             seed=1000 * (i + 1) + r)) / n_axis
+                          for r in range(R)])
+    mean_cm = cum_means.mean(axis=0)
+    run_length[name] = (mean_cm[n_passengers_2b - 1], mean_cm[-1])
+    ax.plot(n_axis, mean_cm, linewidth=2, label=name, **style[name])
+    ax.annotate(f"{name}: {mean_cm[-1]:,.0f} min" if mean_cm[-1] >= 10 else f"{name}: {mean_cm[-1]:.1f} min",
+                xy=(n_day, mean_cm[-1]), xytext=(6, end_offset[name]), textcoords="offset points",
+                va="center", fontsize=9)
+
+for name in ["Baseline", "Option A"]:
+    at_3000 = run_length[name][0]
+    ax.plot(n_passengers_2b, at_3000, "o", color=style[name]["color"], markersize=7, zorder=5)
+    ax.annotate(f"{at_3000:,.0f} min", xy=(n_passengers_2b, at_3000), xytext=(-8, 8),
+                textcoords="offset points", ha="right", fontsize=9)
+
+for x, text in [(n_passengers_2b, "3,000 passengers\n(Part 2B, 11.8 h)"),
+                (n_day, f"full 16-hour day\n({n_day:,} passengers)")]:
+    ax.axvline(x, color="gray", linestyle=":", linewidth=1.5)
+    # between the Option A line and the Baseline line
+    ax.text(x - 40, 0.4, text, transform=ax.get_xaxis_transform(), ha="right", va="center",
+            fontsize=9, color="dimgray")
+
+ax.set_xlim(0, n_day * 1.25)
+ax.set_ylim(0, 1750)
+ax.set_xlabel("Number of passengers simulated (n)")
+ax.set_ylabel("Mean waiting time of the first n passengers (min)")
+ax.set_title("Figure 6: with rho > 1 the mean wait depends on how long you simulate (R = 40)")
+ax.legend(loc="upper left")
+ax.grid(alpha=0.3)
+plt.tight_layout()
+save(fig, "figure6_run_length")
+print("Figure 6 mean wait at 3000 passengers and at a full day:",
+      {k: (round(a, 2), round(b, 2)) for k, (a, b) in run_length.items()})
+
+
+# ---------------------------------------------------------------------------
 # Bonus data: Schiphol September traffic reports 2015-2019
 # ---------------------------------------------------------------------------
 def read_report(path):
